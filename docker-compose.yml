@@ -1,0 +1,112 @@
+# Use a modern version of Docker Compose
+services:
+
+  # ✅ MySQL Container
+  # This service uses the arm64v8 image for compatibility with Mac M1 chips.
+  mysql:
+    image: arm64v8/mysql:8.0
+    container_name: mysql-db
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: hardik1234hh
+      MYSQL_DATABASE: nigaPay
+    volumes:
+      # This creates a named volume to persist MySQL data
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      # This healthcheck ensures the database is ready before the app containers start
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+    networks:
+      - app-network
+
+  # ✅ Spring Boot App Instance 1
+  app1:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: n-app1
+    ports:
+      - "8081:8080"
+    environment:
+      # Pass environment variables to the Spring Boot application
+      INSTANCE_ID: "App-1"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nigaPay?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: hardik1234hh
+    depends_on:
+      # This ensures the app doesn't start until the database is healthy
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ✅ Spring Boot App Instance 2
+  app2:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: n-app2
+    ports:
+      - "8082:8080"
+    environment:
+      INSTANCE_ID: "App-2"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nigaPay?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: hardik1234hh
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ✅ Spring Boot App Instance 3
+  app3:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: n-app3
+    ports:
+      - "8083:8080"
+    environment:
+      INSTANCE_ID: "App-3"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/nigaPay?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: hardik1234hh
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # ✅ NGINX Load Balancer
+  # NGINX distributes traffic to the three Spring Boot instances
+  nginx:
+    image: nginx:latest
+    container_name: nginx-load-balancer-n
+    ports:
+      - "81:80"
+    volumes:
+      # Mount the local nginx.conf file into the container
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      # Ensure NGINX starts after the applications are up
+      - app1
+      - app2
+      - app3
+    networks:
+      - app-network
+
+
+
+# Define a custom network for all services
+networks:
+  app-network:
+    driver: bridge
+
+# Define a named volume to persist MySQL data
+volumes:
+  mysql-data:
