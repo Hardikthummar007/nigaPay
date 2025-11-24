@@ -14,7 +14,7 @@ import java.util.List;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("user")
+@RequestMapping("/user")
 public class commonController {
     @Autowired
     commonService commonService;
