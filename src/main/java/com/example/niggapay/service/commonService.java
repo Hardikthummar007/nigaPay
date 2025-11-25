@@ -193,7 +193,16 @@ public class commonService {
     }
 
     public ResponseEntity<?> addUser(user user) {
+
+        Optional<user> t=userRepo.findById(user.getUserName());
+
+
+        if(t.isPresent()){
+            return new ResponseEntity<>("already exist", HttpStatus.CONFLICT);
+        }else{
+
       return new ResponseEntity<>(userRepo.save(user),HttpStatus.OK);
+        }
 
 
     }
