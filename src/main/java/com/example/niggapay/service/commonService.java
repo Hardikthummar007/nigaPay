@@ -196,7 +196,6 @@ public class commonService {
 
         Optional<user> t=userRepo.findById(user.getUserName());
 
-
         if(t.isPresent()){
             return new ResponseEntity<>("already exist", HttpStatus.CONFLICT);
         }else{
