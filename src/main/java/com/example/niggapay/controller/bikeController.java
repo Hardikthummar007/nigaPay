@@ -21,7 +21,6 @@ public class bikeController {
     @Autowired
     bikeService bikeService;
 
-
     @PostMapping("addGroup")
     ResponseEntity<?> addGroup(@RequestBody bikeGroup bg)
     {

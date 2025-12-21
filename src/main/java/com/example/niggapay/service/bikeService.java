@@ -61,13 +61,9 @@ public class bikeService {
         Map<String,Integer> usersWithCount=dto.getStudentsWithCount();
         int perPersonBikeCost=cost/divideBy;
         String   groupId=dto.getGroupId();
-
         Optional<bikeGroup>   bikeGroup=groupRepo.findById(dto.getGroupId());
-
         if(bikeGroup.isPresent()){
-
             bikeGroup bg=bikeGroup.get();
-
             List<membersOfGroupBike>  listmembersOfGroupBikes=bg.getMembersOfGroupBikeList();
             for(Map.Entry<String, Integer> entry:usersWithCount.entrySet()){
 
@@ -75,14 +71,12 @@ public class bikeService {
                         groupId,
                         entry.getKey()
                 );
-
                 int prevCount=mb.getCount();
                 int preMoney=mb.getMoney();
 
                 mb.setCount(mb.getCount()+entry.getValue());
                 mb.setMoney(preMoney+(perPersonBikeCost*entry.getValue()));
                 membersOfGroupRepo.save(mb);
-
             }
             return new  ResponseEntity<>("success",HttpStatus.OK);
         }else{
